@@ -1,1 +1,3 @@
-# ecommerce-site-backend
+# Ecommerce-site Backend
+
+Build with express JS & Mongodb
