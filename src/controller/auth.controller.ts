@@ -40,19 +40,24 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
 
 export const userSignup = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email } = req.body;
-    console.log(email)
-     const user = await User.findOne({ email: email });
+  
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
 
-     if (user) {
-       return res.status(400).json({
-         message: "email already exist",
-       });
-     }
+    const user = await User.findOne({ email: email });
 
-     const savedUser = await User.create(req.body);
-     await savedUser.save({ validateBeforeSave: false });
+    if (user) {
+      return res.status(400).json({
+        message: "email already exist",
+      });
+    }
 
+    const savedUser = await User.create(req.body);
+    await savedUser.save({ validateBeforeSave: false });
 
     res.status(200).json({
       message: "User signup successful",

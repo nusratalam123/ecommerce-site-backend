@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      validate: [validator.isEmail, "provide a valid email"],
     },
     password: {
       type: String,
@@ -43,18 +42,6 @@ userSchema.pre("save", async function (next) {
 // comparePassword
 userSchema.methods.comparePassword = function (password: string, hash: string) {
   return bcrypt.compareSync(password, hash);
-};
-
-// generateConfirmationToken
-userSchema.methods.generateConfirmationToken = function () {
-  const token = CryptoJS.SHA256("token");
-  this.confirmationToken = token;
-
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  this.confirmationTokenExpires = date;
-
-  return token;
 };
 
 const User = mongoose.model("User", userSchema);
