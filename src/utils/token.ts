@@ -3,15 +3,19 @@ import jwt from "jsonwebtoken";
 import secrets from "../config/secret";
 
 type User = {
+  id: string;
   name: string;
   email: string;
+  role: string;
 };
 
 // generate jwt token
 export const generateToken = (user: User) => {
   const payload = {
+    id: user.id,
     name: user.name,
     email: user.email,
+    role: user.role,
   };
 
   const token = jwt.sign(payload, secrets.jwt_secret, {

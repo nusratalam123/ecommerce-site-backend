@@ -67,52 +67,52 @@ export const userSignup = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-// user login
-// export const userLogin = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const { email, password } = req.body;
+//user login
+export const userLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
 
-//     if (!email || !password) {
-//       throw new Error("Please provide your credentials")
-//     }
+    if (!email || !password) {
+      throw new Error("Please provide your credentials")
+    }
 
-//     const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-//     if (!user) {
-//       throw new Error("No user found. Please create an account",)
-//     }
+    if (!user) {
+      throw new Error("No user found. Please create an account",)
+    }
 
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-//     if (!isPasswordValid) {
-//       throw new Error("Password is not correct")
-//     }
+    if (!isPasswordValid) {
+      throw new Error("Password is not correct")
+    }
 
-//     if (!user.status) {
-//       throw new Error("The user is banned")
-//     }
+    if (!user.status) {
+      throw new Error("The user is banned")
+    }
 
-//     const token = generateToken({
-//       id: user._id.toString(),
-//       name: user.name,
-//       email: user.email,
-//       role: "user",
-//     });
+    const token = generateToken({
+      id: user._id.toString(),
+      name: user.name ?? '',
+      email: user.email,
+      role: "user",
+    });
 
-//     const { password: pwd, ...info } = user.toObject();
+    const { password: pwd, ...info } = user.toObject();
 
-//     res.status(200).json({
-//       message: "Login successful",
-//       data: {
-//         ...info,
-//         role: "user",
-//         token,
-//       },
-//     });
-//   } catch (err: any) {
-//     next(err)
-//   }
-// };
+    res.status(200).json({
+      message: "Login successful",
+      data: {
+        ...info,
+        role: "user",
+        token,
+      },
+    });
+  } catch (err: any) {
+    next(err)
+  }
+};
 
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
