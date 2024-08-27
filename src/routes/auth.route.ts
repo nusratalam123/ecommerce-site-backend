@@ -1,6 +1,11 @@
 import { Router } from "express";
 
-import {logout, userSignup } from "../controller/auth.controller";
+import {
+  logout,
+  userSignup,
+  userLogin,
+  getCurrentUser,
+} from "../controller/auth.controller";
 
 const router = Router();
 
@@ -8,7 +13,10 @@ const router = Router();
 router.post("/signup", userSignup);
 
 // user login
-//router.post("/login", login);
+router.post("/login", userLogin);
+
+// get current user
+router.get("/current-user", getCurrentUser);
 
 // user logout
 router.delete("/logout", logout);

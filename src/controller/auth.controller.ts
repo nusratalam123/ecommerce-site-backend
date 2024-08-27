@@ -4,13 +4,19 @@ import Blacklist from "../model/blacklist.model";
 import User from "./../model/user.model";
 import { generateToken, getBearerToken } from "./../utils/token";
 
-export const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
+export const getCurrentUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     // @ts-expect-error
     const id = req.authId;
+    console.log(id)
 
     // @ts-expect-error
     const role = req.role;
+      console.log(role);
 
     let data;
 
@@ -27,20 +33,23 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
       //   data = await Admin.findById(id);
       //   break;
     }
-
+    console.log(data)
     res.status(200).json({
       message: "success",
       data: data,
       role: role,
     });
   } catch (err: any) {
-    next(err)
+    next(err);
   }
 };
 
-export const userSignup = async (req: Request, res: Response, next: NextFunction) => {
+export const userSignup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-  
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({
@@ -63,58 +72,86 @@ export const userSignup = async (req: Request, res: Response, next: NextFunction
       message: "User signup successful",
     });
   } catch (err: any) {
-    next(err)
+    next(err);
   }
 };
 
 //user login
-export const userLogin = async (req: Request, res: Response, next: NextFunction) => {
+export const userLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new Error("Please provide your credentials")
+      throw new Error("Please provide your credentials");
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      throw new Error("No user found. Please create an account",)
+      throw new Error("No user found. Please create an account");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new Error("Password is not correct")
+      throw new Error("Password is not correct");
     }
 
     if (!user.status) {
-      throw new Error("The user is banned")
+      throw new Error("The user is banned");
     }
 
     const token = generateToken({
       id: user._id.toString(),
-      name: user.name ?? '',
+      name: user.name ?? "",
       email: user.email,
       role: "user",
     });
 
     const { password: pwd, ...info } = user.toObject();
 
-    res.status(200).json({
-      message: "Login successful",
-      data: {
-        ...info,
-        role: "user",
-        token,
-      },
-    });
+    const tokenOption = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    // res.cookie("token", token, tokenOption).status(200).json({
+    //   message: "Login successful",
+    //   data: {
+    //     ...info,
+    //     role: "user",
+    //     token,
+    //   },
+    // });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Ensure secure cookies in production
+      })
+      .status(200)
+      .json({
+        message: "Login successful",
+        data: {
+          // other user data
+          ...info,
+          role: "user",
+          token,
+        },
+      });
   } catch (err: any) {
-    next(err)
+    next(err);
   }
 };
 
-export const logout = async (req: Request, res: Response, next: NextFunction) => {
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = await getBearerToken(req);
     await Blacklist.create({ token: token });
@@ -123,6 +160,6 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       message: "Logout successful",
     });
   } catch (err: any) {
-    next(err)
+    next(err);
   }
 };

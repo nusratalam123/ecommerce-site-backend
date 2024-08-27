@@ -9,7 +9,9 @@ const app = express();
 //middleware
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:3000", // Replace with your frontend's origin
+    credentials: true, // Allow cookies to be sent and received
+    // credentials: process.env.FRONTEND_URL === "http://localhost:3000" ? true : false
   }),
 );
 app.use(cookieParser());

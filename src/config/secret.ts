@@ -8,7 +8,7 @@ const secrets = {
   authorization_secret: process.env.AUTHORIZATION_SECRET as string,
 
   token_secret: process.env.TOKEN_SECRET as string,
-  jwt_secret: process.env.JWT_SECRET_FOR_VERIFY as string,
+  jwt_secret: process.env.JWT_SECRET as string,
 };
 
 export default secrets;
