@@ -12,11 +12,9 @@ export const getCurrentUser = async (
   try {
     // @ts-expect-error
     const id = req.authId;
-    console.log(id)
 
     // @ts-expect-error
     const role = req.role;
-      console.log(role);
 
     let data;
 
@@ -33,7 +31,7 @@ export const getCurrentUser = async (
       //   data = await Admin.findById(id);
       //   break;
     }
-    console.log(data)
+
     res.status(200).json({
       message: "success",
       data: data,
@@ -43,7 +41,6 @@ export const getCurrentUser = async (
     next(err);
   }
 };
-
 export const userSignup = async (
   req: Request,
   res: Response,

@@ -6,18 +6,14 @@ import secrets from "../config/secret";
 
 // jwt bearer token
 export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
-  // if (
-  //   req.path.endsWith("/login") ||
-  //   req.path.endsWith("/signup") ||
-  //   req.path.match(/^\/api\/v1\/product\/.+/) || // PRODUCT REGEX
-  //   req.path.match(/^\/api\/v1\/category\/.+/) || // Category REGEX
-  //   req.path.match(/^\/api\/v1\/banner\/.+/) // Banner REGEX
-  // ) {
-  //   next();
-  //   return;
-  // }
-  //
-  if (1 === 1) {
+  if (
+    req.path.endsWith("/login") ||
+    req.path.endsWith("/signup") ||
+    req.path.match(/^\/api\/v1\/product\/.+/) || // PRODUCT REGEX
+    req.path.match(/^\/api\/v1\/category\/.+/) || // Category REGEX
+    req.path.match(/^\/api\/v1\/banner\/.+/) || // Banner REGEX
+    !req.path.includes("/api/v1")
+  ) {
     next();
     return;
   }
@@ -29,13 +25,12 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
     }
 
     const token = await getBearerToken(req);
+    // console.log(token);
     jwt.verify(token, secrets.jwt_secret, (err: any) => {
       if (err) {
         throw new Error("Forbidden");
       }
     });
-
-    //TODO: ADD ADMIN CODE
 
     const isRevoked = await Blacklist.find({ token: token });
     if (isRevoked.length != 0) {
