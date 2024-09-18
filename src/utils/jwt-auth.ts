@@ -23,9 +23,32 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
     if (!isTokenExist) {
       throw new Error("Unauthorized");
     }
+    let token;
+    // Check for token in Authorization header
+    const authorizationHeader = req.headers["Authorization"];
+    if (authorizationHeader) {
+      const bearer = (authorizationHeader as string).split(" ");
+      token = bearer[1];
+    }
 
-    const token = await getBearerToken(req);
+    // If no token in Authorization header, check cookies
+    if (!token && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      throw new Error("Unauthorized: No token provided");
+    }
+
+    console.log("Token:", token);
+
+    // const token = await getBearerToken(req);
     // console.log(token);
+    if (!token) {
+      console.log("No Bearer Token Found"); // Log for debugging
+      throw new Error("Unauthorized");
+    }
+
     jwt.verify(token, secrets.jwt_secret, (err: any) => {
       if (err) {
         throw new Error("Forbidden");
@@ -54,7 +77,7 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
 async function saveAuthInfo(req: Request, token?: string) {
   try {
     if (!token) {
-      return;
+      throw new Error("Token not found");
     }
 
     const payload = jwt.decode(token);

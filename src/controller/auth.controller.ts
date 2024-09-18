@@ -15,6 +15,7 @@ export const getCurrentUser = async (
 
     // @ts-expect-error
     const role = req.role;
+    console.log(id, role);
 
     let data;
 
@@ -111,11 +112,6 @@ export const userLogin = async (
 
     const { password: pwd, ...info } = user.toObject();
 
-    const tokenOption = {
-      httpOnly: true,
-      secure: true,
-    };
-
     // res.cookie("token", token, tokenOption).status(200).json({
     //   message: "Login successful",
     //   data: {
@@ -126,8 +122,10 @@ export const userLogin = async (
     // });
     res
       .cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Ensure secure cookies in production
+        httpOnly: true, // Prevent JavaScript access to the token
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production (HTTPS)
+        sameSite: "strict", // Or 'Lax' depending on your requirements
+        maxAge: 2 * 24 * 60 * 60 * 1000, // Set the expiration time
       })
       .status(200)
       .json({
