@@ -1,147 +1,78 @@
 import bcrypt from "bcrypt";
 import { NextFunction, Request, Response } from "express";
 import Blacklist from "../model/blacklist.model";
-import User from "./../model/user.model";
+import User from "../model/user.model";
 import { generateToken, getBearerToken } from "./../utils/token";
+import Admin from "../model/admin.model";
 
-export const getCurrentUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+
+// admin signup
+export const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // @ts-expect-error
-    const id = req.authId;
+    const { adminId,email, password } = req.body;
+    const admin = await Admin.findOne({ email: email });
 
-    // @ts-expect-error
-    const role = req.role;
-    console.log(id, role);
-
-    let data;
-
-    switch (role) {
-      case "user":
-        data = await User.findById(id);
-        break;
-      // case "vendor":
-      //   data = await Vendor.findById(id);
-      //   break;
-      // case "superadmin":
-      // case "admin":
-      // case "editor":
-      //   data = await Admin.findById(id);
-      //   break;
+    if (admin) {
+      throw new Error("email already exist")
     }
+
+    const savedAdmin = await Admin.create(req.body);
+    await savedAdmin.save({ validateBeforeSave: false });
 
     res.status(200).json({
-      message: "success",
-      data: data,
-      role: role,
+      message: "Admin signup successful",
     });
   } catch (err: any) {
-    next(err);
-  }
-};
-export const userSignup = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required",
-      });
-    }
-
-    const user = await User.findOne({ email: email });
-
-    if (user) {
-      return res.status(400).json({
-        message: "email already exist",
-      });
-    }
-
-    const savedUser = await User.create(req.body);
-    await savedUser.save({ validateBeforeSave: false });
-
-    res.status(200).json({
-      message: "User signup successful",
-    });
-  } catch (err: any) {
-    next(err);
+    next(err)
   }
 };
 
-//user login
-export const userLogin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+// admin login
+export const adminLogin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new Error("Please provide your credentials");
+      throw new Error("Please provide your credentials")
     }
 
-    const user = await User.findOne({ email });
+    const admin = await Admin.findOne({ email });
 
-    if (!user) {
-      throw new Error("No user found. Please create an account");
+    //console.log(admin);
+
+    if (!admin) {
+      throw new Error("No admin found. Please create an account")
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
 
     if (!isPasswordValid) {
-      throw new Error("Password is not correct");
+      throw new Error("Password is incorrect")
     }
 
-    if (!user.status) {
-      throw new Error("The user is banned");
+    if (!admin.status) {
+      throw new Error("The admin is banned")
     }
 
     const token = generateToken({
-      id: user._id.toString(),
-      name: user.name ?? "",
-      email: user.email,
-      role: "user",
+      id: admin._id.toString(),
+      email: admin.email,
+      role: admin.role.toLowerCase(),
     });
+    const { password: pwd, ...info } = admin.toObject();
 
-    const { password: pwd, ...info } = user.toObject();
-
-    // res.cookie("token", token, tokenOption).status(200).json({
-    //   message: "Login successful",
-    //   data: {
-    //     ...info,
-    //     role: "user",
-    //     token,
-    //   },
-    // });
-    res
-      .cookie("token", token, {
-        httpOnly: true, // Prevent JavaScript access to the token
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production (HTTPS)
-        sameSite: "strict", // Or 'Lax' depending on your requirements
-        maxAge: 2 * 24 * 60 * 60 * 1000, // Set the expiration time
-      })
-      .status(200)
-      .json({
-        message: "Login successful",
-        data: {
-          // other user data
-          ...info,
-          role: "user",
-          token,
-        },
-      });
+    res.status(200).json({
+      message: "admin Login successful",
+      data: {
+        ...info,
+        role: admin.role,
+        token,
+      },
+    });
   } catch (err: any) {
-    next(err);
+    next(err)
   }
 };
-
 export const logout = async (
   req: Request,
   res: Response,

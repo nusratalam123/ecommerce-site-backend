@@ -2,25 +2,19 @@ import { Router } from "express";
 
 import {
   logout,
-  userSignup,
-  userLogin,
-  getCurrentUser,
+  adminSignup,
+  adminLogin,
 } from "../controller/auth.controller";
 
 const router = Router();
 
-// register new user
-router.post("/signup", userSignup);
+// admin signup
+router.post("/admin/signup", adminSignup);
 
-// user login
-router.post("/login", userLogin);
-
-// get current user
-router.get("/current-user", getCurrentUser);
+// admin login
+router.post("/admin/login", adminLogin);
 
 // user logout
 router.delete("/logout", logout);
-
-
 
 export default router;

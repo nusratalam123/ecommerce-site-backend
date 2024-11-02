@@ -2,20 +2,18 @@ import { Request } from "express";
 import jwt from "jsonwebtoken";
 import secrets from "../config/secret";
 
-type User = {
+type AdminUser = {
   id: string;
-  name: string;
   email: string;
   role: string;
 };
 
 // generate jwt token
-export const generateToken = (user: User) => {
+export const generateToken = (adminUser: AdminUser) => {
   const payload = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
+    id: adminUser.id,
+    email: adminUser.email,
+    role: adminUser.role,
   };
 
   const token = jwt.sign(payload, secrets.jwt_secret, {

@@ -9,9 +9,7 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
   if (
     req.path.endsWith("/login") ||
     req.path.endsWith("/signup") ||
-    req.path.match(/^\/api\/v1\/product\/.+/) || // PRODUCT REGEX
-    req.path.match(/^\/api\/v1\/category\/.+/) || // Category REGEX
-    req.path.match(/^\/api\/v1\/banner\/.+/) || // Banner REGEX
+    req.path.endsWith("/logout") ||
     !req.path.includes("/api/v1")
   ) {
     next();
